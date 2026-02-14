@@ -18,19 +18,30 @@ type MemberRow = {
   role: string;
 };
 
-type NomineeRow = {
+type MemberJoined = {
+  full_name: string | null;
+  email: string;
+  member_number: string | null;
+};
+
+// ✅ What Supabase returns for the join (array)
+type NomineeRowDB = {
   id: string; // nomination id
   member_id: string;
   created_at: string;
   blurb: string;
-
   is_approved: boolean | null;
+  members: MemberJoined[] | null;
+};
 
-  members?: {
-    full_name: string | null;
-    email: string;
-    member_number: string | null;
-  } | null;
+// ✅ What we use in the UI (single member object)
+type NomineeRow = {
+  id: string;
+  member_id: string;
+  created_at: string;
+  blurb: string;
+  is_approved: boolean | null;
+  member: MemberJoined | null;
 };
 
 type SessionRow = {
@@ -173,7 +184,16 @@ export default function JoanVotePage() {
           setMsg(nErr.message);
           setNominees([]);
         } else {
-          setNominees((noms ?? []) as NomineeRow[]);
+          const dbRows = (noms ?? []) as NomineeRowDB[];
+          const normalized: NomineeRow[] = dbRows.map((r) => ({
+            id: r.id,
+            member_id: r.member_id,
+            created_at: r.created_at,
+            blurb: r.blurb,
+            is_approved: r.is_approved ?? null,
+            member: r.members && r.members.length > 0 ? r.members[0] : null,
+          }));
+          setNominees(normalized);
         }
 
         // 4) Load my vote (if any)
@@ -304,9 +324,7 @@ Head Witch, Tonya Brown`}
 
         {/* Countdown */}
         <div className="card subtle" style={{ textAlign: "center" }}>
-          <div className="small" style={{ opacity: 0.8 }}>
-            Time remaining
-          </div>
+          <div className="small" style={{ opacity: 0.8 }}>Time remaining</div>
           <div style={{ fontFamily: "var(--font-serif)", fontSize: 28, letterSpacing: "1px", marginTop: 6 }}>
             {votingClosed ? "Voting Closed" : formatCountdown(msLeft)}
           </div>
@@ -319,9 +337,7 @@ Head Witch, Tonya Brown`}
 
         {msg ? (
           <>
-            <div className="small" style={{ opacity: 0.9 }}>
-              {msg}
-            </div>
+            <div className="small" style={{ opacity: 0.9 }}>{msg}</div>
             <div className="spacer" />
           </>
         ) : null}
@@ -341,7 +357,7 @@ Head Witch, Tonya Brown`}
             <div style={{ fontWeight: 900 }}>Your vote has been recorded.</div>
             <div className="small" style={{ marginTop: 8, opacity: 0.85 }}>
               You voted for:{" "}
-              <strong>{chosenNominee?.members?.full_name ?? chosenNominee?.members?.email ?? "Nominee"}</strong>
+              <strong>{chosenNominee?.member?.full_name ?? chosenNominee?.member?.email ?? "Nominee"}</strong>
               <br />
               Recorded at: {new Date(myVote.created_at).toLocaleString()}
             </div>
@@ -353,14 +369,12 @@ Head Witch, Tonya Brown`}
 
             {nominees.length === 0 ? (
               <div className="card subtle">
-                <div className="small" style={{ opacity: 0.85 }}>
-                  No approved nominees yet.
-                </div>
+                <div className="small" style={{ opacity: 0.85 }}>No approved nominees yet.</div>
               </div>
             ) : (
               <div style={{ display: "grid", gap: 10 }}>
                 {nominees.map((n) => {
-                  const displayName = n.members?.full_name ?? n.members?.email ?? "Nominee";
+                  const displayName = n.member?.full_name ?? n.member?.email ?? "Nominee";
                   const selected = selectedNomineeId === n.id;
 
                   return (
@@ -372,15 +386,15 @@ Head Witch, Tonya Brown`}
                         textAlign: "left",
                         cursor: "pointer",
                         border: selected ? "1px solid rgba(121,195,228,.55)" : undefined,
-                        background: selected ? "rgba(121,195,228,.10)" : "color-mix(in srgb, var(--bg) 92%, black)",
+                        background: selected
+                          ? "rgba(121,195,228,.10)"
+                          : "color-mix(in srgb, var(--bg) 92%, black)",
                       }}
                     >
                       <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
                         <div style={{ fontWeight: 900 }}>{displayName}</div>
                         {selected ? (
-                          <div className="small" style={{ color: "var(--haint)", fontWeight: 900 }}>
-                            Selected
-                          </div>
+                          <div className="small" style={{ color: "var(--haint)", fontWeight: 900 }}>Selected</div>
                         ) : null}
                       </div>
 
@@ -411,12 +425,7 @@ Head Witch, Tonya Brown`}
               className="button"
               onClick={castVote}
               disabled={saving || votingClosed || nominees.length === 0 || !selectedNomineeId}
-              style={{
-                width: "100%",
-                padding: "16px 18px",
-                fontSize: 18,
-                fontWeight: 900,
-              }}
+              style={{ width: "100%", padding: "16px 18px", fontSize: 18, fontWeight: 900 }}
             >
               {saving ? "Sealing your vote…" : votingClosed ? "Voting Closed" : "Cast My Vote"}
             </button>
