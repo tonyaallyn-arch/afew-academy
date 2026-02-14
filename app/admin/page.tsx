@@ -95,10 +95,6 @@ export default function AdminHomePage() {
               <a className="button" style={{ width: "auto" }} href="/admin/members">
                 Manage Members
               </a>
-              {/* ✅ updated route */}
-              <a className="button secondary" style={{ width: "auto" }} href="/admin/members/new">
-                Add New Member
-              </a>
             </div>
           </div>
 
