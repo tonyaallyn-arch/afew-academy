@@ -1,0 +1,90 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabaseClient";
+import { useRouter } from "next/navigation";
+
+type Member = {
+  id: string;
+  full_name: string | null;
+  role: "admin" | "member";
+  status: "active" | "lapsed" | "disabled";
+  dues_balance_cents: number;
+  payment_plan: "full" | "monthly" | "quarterly";
+  next_due_date: string | null;
+};
+
+export default function HomePage() {
+  const router = useRouter();
+  const [member, setMember] = useState<Member | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function boot() {
+      const { data: auth } = await supabase.auth.getUser();
+
+      if (!auth.user) {
+        router.replace("/login");
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("members")
+        .select("id, full_name, role, status, dues_balance_cents, payment_plan, next_due_date")
+        .eq("id", auth.user.id)
+        .single();
+
+      if (error || !data || data.status === "disabled") {
+        router.replace("/not-verified");
+        return;
+      }
+
+      setMember(data as Member);
+      setLoading(false);
+    }
+
+    boot();
+  }, [router]);
+
+  async function signOut() {
+    await supabase.auth.signOut();
+    router.replace("/login");
+  }
+
+  if (loading) {
+    return (
+      <main className="container" style={{ paddingTop: 38 }}>
+        <div className="card">
+          <div className="small">Entering the Academy…</div>
+        </div>
+      </main>
+    );
+  }
+
+  return (
+    <main className="container" style={{ paddingTop: 28 }}>
+      <div className="card">
+        <div className="h1">Welcome{member?.full_name ? `, ${member.full_name}` : ""}.</div>
+        <div className="small">
+          Your standing is recorded. This is the private portal of the Academy.
+        </div>
+
+        <div className="spacer" />
+
+        <div className="card" style={{ background: "transparent" }}>
+          <div className="h2">Membership Snapshot</div>
+          <div className="small">
+            Balance Due: <strong>${(member!.dues_balance_cents / 100).toFixed(2)}</strong>
+            <br />
+            Payment Plan: <strong>{member!.payment_plan}</strong>
+            <br />
+            Next Due Date: <strong>{member!.next_due_date ?? "—"}</strong>
+          </div>
+        </div>
+
+        <div className="spacer" />
+        <button className="button secondary" onClick={signOut}>Sign out</button>
+      </div>
+    </main>
+  );
+}
