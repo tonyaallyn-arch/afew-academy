@@ -13,7 +13,6 @@ import { useRouter } from "next/navigation";
  * So every read/write MUST scope to the current annual_event_id.
  */
 const ANNUAL_EVENT_ID = "9279aa84-7abc-4a87-b08c-d76f7ba1aa55";
-
 type MemberRow = {
   id: string;
   email: string;
@@ -23,10 +22,18 @@ type MemberRow = {
   status: "active" | "lapsed" | "disabled" | string;
   dues_balance_cents: number | null;
   payment_plan: "full" | "monthly" | "quarterly" | string | null;
-  next_due_date: string | null; // YYYY-MM-DD
+  next_due_date: string | null;
   tags: string[] | null;
-};
 
+  birthday: string | null;
+  dietary_restrictions: string | null;
+  food_preferences: string | null;
+  allergies: string | null;
+  emergency_contact_name: string | null;
+  emergency_contact_phone: string | null;
+  emergency_contact_relationship: string | null;
+  possum_group: boolean | null;
+};
 type SessionRow = {
   id: string;
   title: string;
@@ -92,6 +99,14 @@ export default function AdminMembersPage() {
   const [editNextDue, setEditNextDue] = useState<string>("");
   const [editBalance, setEditBalance] = useState<string>("0.00");
   const [editSessionId, setEditSessionId] = useState<string>("");
+const [editBirthday, setEditBirthday] = useState("");
+const [editDietaryRestrictions, setEditDietaryRestrictions] = useState("");
+const [editFoodPreferences, setEditFoodPreferences] = useState("");
+const [editAllergies, setEditAllergies] = useState("");
+const [editEmergencyName, setEditEmergencyName] = useState("");
+const [editEmergencyPhone, setEditEmergencyPhone] = useState("");
+const [editEmergencyRelationship, setEditEmergencyRelationship] = useState("");
+const [editPossumGroup, setEditPossumGroup] = useState(false);
 
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
@@ -127,7 +142,26 @@ export default function AdminMembersPage() {
     // members
     const { data: mem, error: memErr } = await supabase
       .from("members")
-      .select("id,email,full_name,member_number,role,status,dues_balance_cents,payment_plan,next_due_date,tags")
+    .select(`
+  id,
+  email,
+  full_name,
+  member_number,
+  role,
+  status,
+  dues_balance_cents,
+  payment_plan,
+  next_due_date,
+  tags,
+  birthday,
+  dietary_restrictions,
+  food_preferences,
+  allergies,
+  emergency_contact_name,
+  emergency_contact_phone,
+  emergency_contact_relationship,
+  possum_group
+`)
       .order("full_name", { ascending: true });
 
     if (memErr) throw memErr;
@@ -268,6 +302,14 @@ export default function AdminMembersPage() {
     setEditNextDue(m.next_due_date ?? "");
     setEditBalance(centsToMoney(m.dues_balance_cents));
     setEditSessionId(assignments[m.id] ?? "");
+setEditBirthday(m.birthday ?? "");
+setEditDietaryRestrictions(m.dietary_restrictions ?? "");
+setEditFoodPreferences(m.food_preferences ?? "");
+setEditAllergies(m.allergies ?? "");
+setEditEmergencyName(m.emergency_contact_name ?? "");
+setEditEmergencyPhone(m.emergency_contact_phone ?? "");
+setEditEmergencyRelationship(m.emergency_contact_relationship ?? "");
+setEditPossumGroup(!!m.possum_group);
 
     loadPayments(m.id);
 
@@ -348,6 +390,14 @@ export default function AdminMembersPage() {
           payment_plan: editPlan,
           next_due_date: editNextDue ? editNextDue : null,
           dues_balance_cents: balanceCents,
+birthday: editBirthday || null,
+dietary_restrictions: editDietaryRestrictions.trim() || null,
+food_preferences: editFoodPreferences.trim() || null,
+allergies: editAllergies.trim() || null,
+emergency_contact_name: editEmergencyName.trim() || null,
+emergency_contact_phone: editEmergencyPhone.trim() || null,
+emergency_contact_relationship: editEmergencyRelationship.trim() || null,
+possum_group: editPossumGroup,
         })
         .eq("id", selected.id);
 
@@ -370,6 +420,14 @@ export default function AdminMembersPage() {
                 payment_plan: editPlan,
                 next_due_date: editNextDue ? editNextDue : null,
                 dues_balance_cents: balanceCents,
+birthday: editBirthday || null,
+dietary_restrictions: editDietaryRestrictions.trim() || null,
+food_preferences: editFoodPreferences.trim() || null,
+allergies: editAllergies.trim() || null,
+emergency_contact_name: editEmergencyName.trim() || null,
+emergency_contact_phone: editEmergencyPhone.trim() || null,
+emergency_contact_relationship: editEmergencyRelationship.trim() || null,
+possum_group: editPossumGroup,
               }
             : m
         )
@@ -521,7 +579,13 @@ export default function AdminMembersPage() {
           }}
           onClick={() => !saving && setSelected(null)}
         >
-          <div className="card" style={{ width: "min(820px, 96vw)" }} onClick={(e) => e.stopPropagation()}>
+         <div
+  style={{
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))",
+    gap: 12,
+  }}
+>
             <div className="h2">Edit Member</div>
             <div className="small" style={{ opacity: 0.8 }}>
               {selected.email} • {selected.id}
@@ -621,6 +685,121 @@ export default function AdminMembersPage() {
               <div className="small" style={{ marginBottom: 6 }}>
                 Reserved Session (scoped to current annual event)
               </div>
+<div className="spacer" />
+
+<div className="card subtle">
+  <div style={{ fontWeight: 900 }}>Member Details</div>
+
+  <div className="spacer" />
+
+  <div className="row" style={{ gap: 10, flexWrap: "wrap" }}>
+    <div style={{ flex: "0 0 200px" }}>
+      <div className="small" style={{ marginBottom: 6 }}>
+        Birthday
+      </div>
+      <input
+        className="input"
+        type="date"
+        value={editBirthday}
+        onChange={(e) => setEditBirthday(e.target.value)}
+      />
+    </div>
+
+    <label
+      className="small"
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 8,
+        marginTop: 26,
+      }}
+    >
+      <input
+        type="checkbox"
+        checked={editPossumGroup}
+        onChange={(e) => setEditPossumGroup(e.target.checked)}
+      />
+      Possum Group Access
+    </label>
+  </div>
+
+  <div className="spacer" />
+
+  <div className="small" style={{ marginBottom: 6 }}>
+    Dietary Restrictions
+  </div>
+  <textarea
+    className="input"
+    value={editDietaryRestrictions}
+    onChange={(e) => setEditDietaryRestrictions(e.target.value)}
+    rows={3}
+  />
+
+  <div className="spacer" />
+
+  <div className="small" style={{ marginBottom: 6 }}>
+    Food Preferences
+  </div>
+  <textarea
+    className="input"
+    value={editFoodPreferences}
+    onChange={(e) => setEditFoodPreferences(e.target.value)}
+    rows={3}
+  />
+
+  <div className="spacer" />
+
+  <div className="small" style={{ marginBottom: 6 }}>
+    Allergies
+  </div>
+  <textarea
+    className="input"
+    value={editAllergies}
+    onChange={(e) => setEditAllergies(e.target.value)}
+    rows={3}
+  />
+
+  <div className="spacer" />
+
+  <div style={{ fontWeight: 900 }}>Emergency Contact</div>
+
+  <div className="spacer" />
+
+  <div className="row" style={{ gap: 10, flexWrap: "wrap" }}>
+    <div style={{ flex: "1 1 240px" }}>
+      <div className="small" style={{ marginBottom: 6 }}>
+        Name
+      </div>
+      <input
+        className="input"
+        value={editEmergencyName}
+        onChange={(e) => setEditEmergencyName(e.target.value)}
+      />
+    </div>
+
+    <div style={{ flex: "1 1 200px" }}>
+      <div className="small" style={{ marginBottom: 6 }}>
+        Phone
+      </div>
+      <input
+        className="input"
+        value={editEmergencyPhone}
+        onChange={(e) => setEditEmergencyPhone(e.target.value)}
+      />
+    </div>
+
+    <div style={{ flex: "1 1 220px" }}>
+      <div className="small" style={{ marginBottom: 6 }}>
+        Relationship
+      </div>
+      <input
+        className="input"
+        value={editEmergencyRelationship}
+        onChange={(e) => setEditEmergencyRelationship(e.target.value)}
+      />
+    </div>
+  </div>
+</div>
               <select className="input" value={editSessionId} onChange={(e) => setEditSessionId(e.target.value)}>
                 <option value="">— Not assigned —</option>
                 {sessions.map((s) => (

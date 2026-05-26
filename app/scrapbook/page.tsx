@@ -38,13 +38,14 @@ export default async function ScrapbookPage() {
         {images.length === 0 ? (
           <div className="small">No images found yet. Add files to /public/scrapbook.</div>
         ) : (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))",
-              gap: 12,
-            }}
-          >
+<div
+  style={{
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))",
+    gap: 12,
+  }}
+>
+          
             {images.map((src) => (
               <a
                 key={src}
@@ -59,16 +60,16 @@ export default async function ScrapbookPage() {
                 }}
               >
                 <img
-                  src={src}
-                  alt=""
-                  style={{
-                    width: 180,
-                    height: "100%",
-                    objectFit: "cover",
-                    display: "block",
-                  }}
-                  loading="lazy"
-                />
+  src={src}
+  alt=""
+  style={{
+    width: "100%",
+    height: 220,
+    objectFit: "cover",
+    display: "block",
+  }}
+  loading="lazy"
+/>
               </a>
             ))}
           </div>

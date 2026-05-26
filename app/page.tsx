@@ -457,7 +457,32 @@ export default function HomePage() {
           </div>
         </>
       ) : null}
+{/* Session B only: Possum group */}
+{sessionCode === "B" ? (
+  <>
+    <div className="spacer" />
+    <div className="card" style={{ textAlign: "center" }}>
+      <div className="h2">Possum Group</div>
+      <div className="small" style={{ opacity: 0.85, marginTop: 6 }}>
+        Session B members only.
+      </div>
 
+      <div className="spacer" />
+
+      <a href="/possum" style={{ display: "inline-block" }}>
+        <img
+          src="/possum.gif"
+          alt="Possum Group"
+          style={{ width: 220, maxWidth: "80%", height: "auto" }}
+        />
+      </a>
+
+      <div className="small" style={{ opacity: 0.75, marginTop: 10 }}>
+        Tap the possum to enter.
+      </div>
+    </div>
+  </>
+) : null}
       <div className="spacer" />
 
       {/* Account */}

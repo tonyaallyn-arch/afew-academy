@@ -241,19 +241,7 @@ export default function AdminHomePage() {
               <div className="small" style={{ opacity: 0.85, marginTop: 6 }}>
                 Current standings
               </div>
-<div className="card subtle">
-  <div style={{ fontWeight: 900 }}>Session Roster Reports</div>
 
-  <div className="small" style={{ opacity: 0.85, marginTop: 6 }}>
-    View emergency contacts, dietary notes, allergies, and room assignments by session.
-  </div>
-
-  <div className="spacer" />
-
-  <a className="button secondary" style={{ width: "auto" }} href="/admin/rosters">
-    Open Rosters
-  </a>
-</div>
               <div className="spacer" />
 
               <div style={{ display: "grid", gap: 8 }}>
@@ -295,42 +283,14 @@ export default function AdminHomePage() {
               Manage Members
             </a>
           </div>
-<div className="card subtle">
-  <div style={{ fontWeight: 900 }}>Bedroom Assignments</div>
 
-  <div className="small" style={{ opacity: 0.85, marginTop: 6 }}>
-    Assign members to rooms by session and track occupancy.
-  </div>
-
-  <div className="spacer" />
-
-  <a
-    className="button secondary"
-    style={{ width: "auto" }}
-    href="/admin/bedrooms"
-  >
-    Manage Bedrooms
-  </a>
-</div>
           <div className="card subtle">
             <div style={{ fontWeight: 900 }}>Events</div>
 
             <div className="small" style={{ opacity: 0.85, marginTop: 6 }}>
               View what members see and sanity-check sessions.
             </div>
-<div className="card subtle">
-  <div style={{ fontWeight: 900 }}>Financial Dashboard</div>
 
-  <div className="small" style={{ opacity: 0.85, marginTop: 6 }}>
-    Track actual income, expenses, projections, reserve fund, and Tonya&apos;s Pay.
-  </div>
-
-  <div className="spacer" />
-
-  <a className="button secondary" style={{ width: "auto" }} href="/admin/budget">
-    Open Financial Dashboard
-  </a>
-</div>
             <div className="spacer" />
 
             <div className="row" style={{ gap: 10, flexWrap: "wrap" }}>
